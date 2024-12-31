@@ -3,7 +3,7 @@ replicaCount: 2
 image:
   repository: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}
   tag: $GITHUB_SHA  # This will be the commit hash tag used in the CI/CD pipeline
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: LoadBalancer
