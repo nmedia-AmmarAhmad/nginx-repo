@@ -1,0 +1,39 @@
+name: CI/CD Pipeline for NGINX
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Step 2: Set up Docker Buildx (for multi-platform builds)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    # Step 3: Log in to AWS ECR
+    - name: Log in to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v1
+
+    # Step 4: Build the Docker image
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ secrets.ECR_REPOSITORY_NAME }}:$GITHUB_SHA .
+
+    # Step 5: Tag the Docker image
+    - name: Tag Docker image
+      run: |
+        docker tag ${{ secrets.ECR_REPOSITORY_NAME }}:$GITHUB_SHA ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:$GITHUB_SHA
+
+    # Step 6: Push the Docker image to ECR
+    - name: Push Docker image to ECR
+      run: |
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:$GITHUB_SHA
+
+
