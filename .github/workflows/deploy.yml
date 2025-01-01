@@ -50,5 +50,5 @@ jobs:
 
     - name: Wait for LoadBalancer to be provisioned
       run: |
-        kubectl wait --for=condition=available --timeout=600s deployment/my-app -n default
+        kubectl rollout status deployment/my-app -n default --timeout=600s
         kubectl get svc my-app -n default
