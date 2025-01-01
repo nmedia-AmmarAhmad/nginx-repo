@@ -1,62 +1,42 @@
-name: Deploy to EKS
+name: Deploy Static Site to EKS
 
 on:
   push:
     branches:
-      - main  # or your default branch
-  pull_request:
-    branches:
-      - main
+      - main  # or your preferred branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up AWS CLI
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Log in to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v1
+      - name: Build and push Docker image to ECR
+        run: |
+          # Build the Docker image
+          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest .
+          # Push the Docker image to ECR
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
 
-    - name: Build Docker image and push to ECR
-      run: |
-        docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest .
-        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+      - name: Set up Kubeconfig
+        uses: aws-actions/configure-kubeconfig@v1
+        with:
+          region: ${{ secrets.AWS_REGION }}
+          cluster-name: SampleEKSCluster
 
-    - name: Set up Helm
-      run: |
-        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-        helm repo add stable https://charts.helm.sh/stable
-        helm repo update
+      - name: Deploy Static Site with Helm to EKS
+        run: |
+          helm upgrade --install static-site ./nginx-helm --namespace default \
+            --set image.repository=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }} \
+            --set image.tag=latest \
+            --set service.type=LoadBalancer
 
-    - name: Configure kubectl for EKS
-      run: |
-        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name SampleEKSCluster
+      - name: Wait for LoadBalancer to be ready
+        run: |
+          kubectl wait --for=condition=available --timeout=600s deployment/static-site -n default
+          kubectl get svc static-site -n default
 
-    - name: Deploy NGINX with Helm to EKS
-      run: |
-        helm upgrade --install static-site ./nginx-helm --namespace default \
-        --set image.repository=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }} \
-        --set image.tag=latest \
-        --set service.type=LoadBalancer
-
-    - name: Debug - List all deployments in the default namespace
-      run: |
-        kubectl get deployments -n default
-
-    - name: Debug - List all services in the default namespace
-      run: |
-        kubectl get svc -n default
-
-    - name: Wait for LoadBalancer to be provisioned
-      run: |
-        kubectl rollout status deployment/static-site -n default --timeout=600s
-        kubectl get svc static-site -n default
