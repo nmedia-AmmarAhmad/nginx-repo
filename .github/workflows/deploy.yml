@@ -43,12 +43,20 @@ jobs:
 
     - name: Deploy NGINX with Helm to EKS
       run: |
-        helm upgrade --install my-app ./nginx-helm --namespace default \
+        helm upgrade --install static-site ./nginx-helm --namespace default \
         --set image.repository=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }} \
         --set image.tag=latest \
         --set service.type=LoadBalancer
 
+    - name: Debug - List all deployments in the default namespace
+      run: |
+        kubectl get deployments -n default
+
+    - name: Debug - List all services in the default namespace
+      run: |
+        kubectl get svc -n default
+
     - name: Wait for LoadBalancer to be provisioned
       run: |
-        kubectl rollout status deployment/my-app -n default --timeout=600s
-        kubectl get svc my-app -n default
+        kubectl rollout status deployment/static-site -n default --timeout=600s
+        kubectl get svc static-site -n default
