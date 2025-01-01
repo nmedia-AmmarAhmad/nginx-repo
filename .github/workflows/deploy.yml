@@ -39,7 +39,7 @@ jobs:
 
     - name: Configure kubectl for EKS
       run: |
-        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name your-cluster-name
+        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name SampleEKSCluster
 
     - name: Deploy NGINX with Helm to EKS
       run: |
