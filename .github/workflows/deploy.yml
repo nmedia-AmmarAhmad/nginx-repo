@@ -23,7 +23,7 @@ jobs:
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
 
       - name: Set up Kubeconfig
-        uses: aws-actions/configure-kubeconfig@v1
+        uses: aws-actions/configure-kubeconfig@v2  # Corrected to v2
         with:
           region: ${{ secrets.AWS_REGION }}
           cluster-name: SampleEKSCluster
@@ -39,4 +39,3 @@ jobs:
         run: |
           kubectl wait --for=condition=available --timeout=600s deployment/static-site -n default
           kubectl get svc static-site -n default
-
