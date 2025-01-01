@@ -1,12 +1,5 @@
-# Use an official NGINX image as a base
+# Use the official NGINX image as the base
 FROM nginx:latest
 
-# Copy the HTML and CSS files into the NGINX default directory
-COPY index.html /usr/share/nginx/html/
-COPY styles.css /usr/share/nginx/html/
-
-# Expose port 80
+# Expose port 80 to make the NGINX service accessible
 EXPOSE 80
-
-# Start NGINX in the foreground
-CMD ["nginx", "-g", "daemon off;"]

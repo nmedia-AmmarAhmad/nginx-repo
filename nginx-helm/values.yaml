@@ -1,16 +1,4 @@
-replicaCount: 1
-
 image:
-  repository: ""
+  repository: nginx
   tag: latest
-  pullPolicy: Always
-
-service:
-  type: LoadBalancer
-  port: 80
-
-ingress:
-  enabled: false
-
-resources: {}
-
+  pullPolicy: IfNotPresent

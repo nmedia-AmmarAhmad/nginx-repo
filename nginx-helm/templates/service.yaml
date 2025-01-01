@@ -1,12 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: static-site-service
+  name: nginx-service
 spec:
-  selector:
-    app: static-site
+  type: LoadBalancer
   ports:
-    - protocol: TCP
-      port: {{ .Values.service.port }}
+    - port: 80
       targetPort: 80
-  type: {{ .Values.service.type }}
+  selector:
+    app: nginx

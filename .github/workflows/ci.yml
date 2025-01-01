@@ -47,3 +47,8 @@ jobs:
       - name: Push Docker image to ECR
         run: |
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+
+                # Step 8: Upload Build Artifacts to S3
+      - name: Upload Artifacts to S3
+        run: |
+          aws s3 cp ./build-output s3://${{ secrets.S3_BUCKET_NAME }}/artifacts/ --recursive
