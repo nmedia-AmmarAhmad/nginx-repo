@@ -24,7 +24,7 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
       with:
         registry-type: private
-        region: ${{ secrets.AWS_REGION }}  # Make sure this is set to the AWS region
+        region: ${{ secrets.AWS_REGION }}
 
     - name: Build and Push Docker Image to ECR
       run: |
@@ -34,6 +34,10 @@ jobs:
 
     - name: Set up Helm
       uses: azure/setup-helm@v1
+
+    - name: Configure kubectl to use EKS
+      run: |
+        aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name SampleEKSCluster
 
     - name: Deploy using Helm
       run: |
