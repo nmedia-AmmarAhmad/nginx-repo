@@ -1,24 +1,16 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
-  repository: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}
-  tag: $GITHUB_SHA  # This will be the commit hash tag used in the CI/CD pipeline
+  repository: ""
+  tag: latest
   pullPolicy: Always
 
 service:
   type: LoadBalancer
   port: 80
 
-resources:
-  limits:
-    cpu: 200m
-    memory: 256Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
+ingress:
+  enabled: false
 
-nodeSelector: {}
+resources: {}
 
-tolerations: []
-
-affinity: {}
