@@ -37,6 +37,10 @@ jobs:
         helm repo add stable https://charts.helm.sh/stable
         helm repo update
 
+    - name: Configure kubectl for EKS
+      run: |
+        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name your-cluster-name
+
     - name: Deploy NGINX with Helm to EKS
       run: |
         helm upgrade --install my-app ./nginx-helm --namespace default \
