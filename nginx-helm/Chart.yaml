@@ -1,5 +1,0 @@
-apiVersion: v2
-name: static-site-chart
-description: A Helm chart for deploying the static site on EKS
-version: 0.1.0
-appVersion: "1.0.0"
