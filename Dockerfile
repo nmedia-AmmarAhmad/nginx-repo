@@ -1,5 +1,12 @@
-# Use the official NGINX image as the base Testing
+# Use the official Nginx image
 FROM nginx:latest
 
-# Expose port 80 to make the NGINX service accessible
+# Copy HTML and CSS files to Nginx's default directory
+COPY index.html /usr/share/nginx/html/index.html
+COPY styles.css /usr/share/nginx/html/styles.css
+
+# Expose port 80
 EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
