@@ -7,6 +7,11 @@ spec:
   selector:
     matchLabels:
       app: homepage                # Label used to identify the app
+  strategy:
+    type: RollingUpdate            # Deployment strategy
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -14,7 +19,8 @@ spec:
     spec:
       containers:
         - name: homepage-container  # Name of the container
-          image: 977099005294.dkr.ecr.us-east-1.amazonaws.com/nginx-repo:latest  # ECR Image
+          image: 977099005294.dkr.ecr.us-east-1.amazonaws.com/nginx-repo:latest  # Versioned image tag
+          imagePullPolicy: Always   # Ensure the latest image is always pulled
           ports:
             - containerPort: 80
 
