@@ -1,18 +1,20 @@
-name: Build, Push, and Deploy HTML Website
+name: Build and Deploy HTML Site
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow on a push to the main branch
 
 jobs:
-  build-and-deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # Step 2: Set up AWS credentials using AWS Secrets
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -20,16 +22,34 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # Step 3: Set up Docker Buildx (enables advanced features of Docker builds)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 4: Log in to Amazon ECR using AWS CLI
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry-type: private
+          skip-logout: false
 
-      - name: Build, Tag, and Push Docker Image
+      # Step 5: Build Docker image
+      - name: Build Docker image
         run: |
           docker build -t ${{ secrets.ECR_REPOSITORY_NAME }} .
+
+      # Step 6: Tag Docker image
+      - name: Tag Docker image
+        run: |
           docker tag ${{ secrets.ECR_REPOSITORY_NAME }}:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+
+      # Step 7: Push Docker image to ECR
+      - name: Push Docker image to ECR
+        run: |
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
 
-      - name: Update Helm Deployment with New Image
+      # Step 8: Update Helm deployment with the new image
+      - name: Update Helm Deployment
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
           helm upgrade html-site ./nginx-helm \
@@ -37,7 +57,8 @@ jobs:
             --set image.tag=latest \
             --namespace default
 
-      - name: Verify Deployment
+      # Step 9: Verify the rollout status
+      - name: Verify Deployment Rollout
         run: |
           kubectl rollout status deployment/html-site
           kubectl get svc html-site-service
