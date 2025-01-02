@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: one-page-app-deployment   # Name of the deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage                # Label used to identify the app
+  template:
+    metadata:
+      labels:
+        app: homepage              # Label for the pod
+    spec:
+      containers:
+        - name: homepage-container  # Name of the container
+          image: 977099005294.dkr.ecr.us-east-1.amazonaws.com/nginx-repo:latest  # ECR Image
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage-service
+spec:
+  selector:
+    app: homepage  # Match the label defined in your Deployment
+  ports:
+    - protocol: TCP
+      port: 80      # Expose on port 80
+      targetPort: 80
+  type: LoadBalancer  # Create an ELB automatically

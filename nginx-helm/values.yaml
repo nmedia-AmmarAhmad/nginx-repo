@@ -1,4 +1,5 @@
 image:
-  repository: nginx
+  repository: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/<ECR_REPOSITORY_NAME>
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
+
