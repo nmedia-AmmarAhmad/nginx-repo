@@ -104,7 +104,7 @@ Resources:
           - !Ref PublicSubnet2
         SecurityGroupIds:
           - !Ref EKSSecurityGroup
-      Version: '1.27'
+      Version: '1.28'
 
   # Node Group
   EKSNodeGroup:
